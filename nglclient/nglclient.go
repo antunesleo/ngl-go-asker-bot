@@ -25,7 +25,7 @@ func (c NGLClient) AskQuestion(user, question string) error {
 
 	resp, err := http.Post(url, "application/json", responseBody)
 	if err != nil {
-		fmt.Fprintln(c.Writer, "An Error Occured %v", err)
+		fmt.Fprintf(c.Writer, "An Error Occured %v", err)
 		return err
 	}
 

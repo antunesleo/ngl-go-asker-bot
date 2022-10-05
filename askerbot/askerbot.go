@@ -22,24 +22,26 @@ func Run(writer io.Writer, asker QuestionAsker, termAsker TermAsker) {
 		return
 	}
 
-	addQuestion := true
-	for addQuestion {
+	for {
 		err, question, skipped := termAsker.AskInput("Type a question", true)
 		if err != nil {
 			return
 		}
 		if skipped {
-			addQuestion = false
 			break
 		}
 		questions = append(questions, question)
 	}
 
-	fmt.Fprintln(writer, "")
-	fmt.Fprintln(writer, "")
-	fmt.Fprintln(writer, "-----------------")
-	fmt.Fprintln(writer, "Started to ask questions")
-	fmt.Fprintln(writer, "User: ", user)
+	output := `
+
+----------------------------
+Started to ask questions
+User %s
+
+`
+
+	fmt.Fprintf(writer, output, user)
 
 	for _, question := range questions {
 		err := asker.AskQuestion(user, question)
