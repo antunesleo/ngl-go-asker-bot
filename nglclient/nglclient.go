@@ -3,14 +3,16 @@ package nglclient
 import (
 	"bytes"
 	"encoding/json"
-	"log"
+	"fmt"
+	"io"
 	"net/http"
 )
 
 const FAKE_DEVICE_ID = "4c5c626-a2eb-42e6-b639-689594052958"
 
 type NGLClient struct {
-	URL string
+	URL    string
+	Writer io.Writer
 }
 
 func (c NGLClient) AskQuestion(user, question string) error {
@@ -23,10 +25,10 @@ func (c NGLClient) AskQuestion(user, question string) error {
 
 	resp, err := http.Post(url, "application/json", responseBody)
 	if err != nil {
-		log.Fatalf("An Error Occured %v", err)
+		fmt.Fprintln(c.Writer, "An Error Occured %v", err)
 		return err
 	}
 
-	log.Println("statusCode", resp.StatusCode)
+	fmt.Fprintln(c.Writer, "statusCode", resp.StatusCode)
 	return nil
 }

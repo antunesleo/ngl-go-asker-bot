@@ -3,18 +3,21 @@ package termasker
 import (
 	"bufio"
 	"errors"
+	"fmt"
+	"io"
 	"log"
 )
 
 type TermAsker struct {
 	Scanner *bufio.Scanner
+	Writer  io.Writer
 }
 
 func (ta TermAsker) AskInput(question string, isSkippable bool) (error, string, bool) {
 	if isSkippable {
 		question = question + " | [s] to skip"
 	}
-	log.Println(question)
+	fmt.Fprintln(ta.Writer, question)
 	var result string
 	if ta.Scanner.Scan() {
 		result = ta.Scanner.Text()
@@ -26,7 +29,7 @@ func (ta TermAsker) AskInput(question string, isSkippable bool) (error, string, 
 		return nil, "", true
 	}
 	if result == "" {
-		log.Fatalln("This information is required, aborting")
+		fmt.Fprintln(ta.Writer, "This information is required, aborting")
 		return errors.New("User didn't type any value"), "", false
 	}
 	return nil, result, false

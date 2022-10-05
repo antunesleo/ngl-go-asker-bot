@@ -1,7 +1,8 @@
 package askerbot
 
 import (
-	"log"
+	"fmt"
+	"io"
 )
 
 type QuestionAsker interface {
@@ -12,10 +13,10 @@ type TermAsker interface {
 	AskInput(question string, isSkippable bool) (error, string, bool)
 }
 
-func Run(asker QuestionAsker, termAsker TermAsker) {
+func Run(writer io.Writer, asker QuestionAsker, termAsker TermAsker) {
 	questions := []string{}
 
-	log.Println("Welcome to NGL Asker BOT! o/")
+	fmt.Fprintln(writer, "Welcome to NGL Asker BOT! o/")
 	err, user, _ := termAsker.AskInput("Type NGL user", false)
 	if err != nil {
 		return
@@ -34,16 +35,16 @@ func Run(asker QuestionAsker, termAsker TermAsker) {
 		questions = append(questions, question)
 	}
 
-	log.Println("")
-	log.Println("")
-	log.Println("-----------------")
-	log.Println("Started to ask questions")
-	log.Println("User: ", user)
+	fmt.Fprintln(writer, "")
+	fmt.Fprintln(writer, "")
+	fmt.Fprintln(writer, "-----------------")
+	fmt.Fprintln(writer, "Started to ask questions")
+	fmt.Fprintln(writer, "User: ", user)
 
 	for _, question := range questions {
 		err := asker.AskQuestion(user, question)
 		if err == nil {
-			log.Println("Asked question: ", question)
+			fmt.Fprintln(writer, "Asked question: ", question)
 		}
 	}
 }
