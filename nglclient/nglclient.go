@@ -22,7 +22,6 @@ func (c NGLClient) AskQuestion(user, question string) error {
 		"deviceId": FAKE_DEVICE_ID,
 	})
 	responseBody := bytes.NewBuffer(postBody)
-
 	resp, err := http.Post(url, "application/json", responseBody)
 	if err != nil {
 		fmt.Fprintf(c.Writer, "An Error Occured %v", err)
