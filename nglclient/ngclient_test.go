@@ -3,12 +3,11 @@ package nglclient
 import (
 	"bufio"
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"github.com/bitly/go-simplejson"
 )
 
 func TestShouldAskQuestionOnNGL(t *testing.T) {
@@ -19,18 +18,16 @@ func TestShouldAskQuestionOnNGL(t *testing.T) {
 		if r.URL.EscapedPath() != "/breno" {
 			t.Errorf("Expected request to ‘/breno, got ‘%s’", r.URL.EscapedPath())
 		}
-		reqJson, err := simplejson.NewFromReader(r.Body)
-		if err != nil {
-			t.Errorf("Error while reading request JSON: %s", err)
+
+		var myBody askQuestionBody
+		json.NewDecoder(r.Body).Decode(&myBody)
+		if myBody.DeviceId != FAKE_DEVICE_ID {
+			t.Errorf("Expected deviceID to  be %s, got %s", FAKE_DEVICE_ID, myBody.DeviceId)
 		}
-		deviceId := reqJson.GetPath("deviceId").MustString()
-		if deviceId != FAKE_DEVICE_ID {
-			t.Errorf("Expected deviceID to  be %s, got %s", FAKE_DEVICE_ID, deviceId)
+		if myBody.Question != "The earth is flat?" {
+			t.Errorf("Expected question to  be The earth is flat?, got %s", myBody.Question)
 		}
-		question := reqJson.GetPath("question").MustString()
-		if question != "The earth is flat?" {
-			t.Errorf("Expected question to  be The earth is flat?, got %s", question)
-		}
+
 		fmt.Fprintln(w, "Hello, client")
 	}))
 

@@ -13,6 +13,10 @@ type TermAsker struct {
 	Writer  io.Writer
 }
 
+func New(scanner *bufio.Scanner, writer io.Writer) *TermAsker {
+	return &TermAsker{Scanner: scanner, Writer: writer}
+}
+
 func (ta TermAsker) AskInput(question string, isSkippable bool) (error, string, bool) {
 	if isSkippable {
 		question = question + " | [s] to skip"

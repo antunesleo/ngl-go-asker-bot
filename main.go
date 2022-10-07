@@ -11,7 +11,7 @@ import (
 
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
-	termAsker := termasker.TermAsker{Scanner: scanner, Writer: os.Stdout}
-	nglClient := nglclient.NGLClient{URL: "https://ngl.link", Writer: os.Stdout}
+	termAsker := termasker.New(scanner, os.Stdout)
+	nglClient := nglclient.New("https://ngl.link", os.Stdout)
 	askerbot.Run(os.Stdout, nglClient, termAsker)
 }

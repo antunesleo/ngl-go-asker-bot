@@ -15,14 +15,21 @@ type NGLClient struct {
 	Writer io.Writer
 }
 
+type askQuestionBody struct {
+	DeviceId string `json:"deviceId"`
+	Question string `json:"question"`
+}
+
+func New(url string, writer io.Writer) *NGLClient {
+	return &NGLClient{URL: url, Writer: writer}
+}
+
 func (c NGLClient) AskQuestion(user, question string) error {
 	url := c.URL + "/" + user
-	postBody, _ := json.Marshal(map[string]string{
-		"question": question,
-		"deviceId": FAKE_DEVICE_ID,
-	})
-	responseBody := bytes.NewBuffer(postBody)
-	resp, err := http.Post(url, "application/json", responseBody)
+	myAskQuestionBody := askQuestionBody{DeviceId: FAKE_DEVICE_ID, Question: question}
+	bodyBuffer := new(bytes.Buffer)
+	json.NewEncoder(bodyBuffer).Encode(myAskQuestionBody)
+	resp, err := http.Post(url, "application/json", bodyBuffer)
 	if err != nil {
 		fmt.Fprintf(c.Writer, "An Error Occured %v", err)
 		return err
