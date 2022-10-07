@@ -3,7 +3,6 @@ package termasker
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"io"
 	"strings"
 	"testing"
@@ -22,9 +21,6 @@ func TestShouldAskInput(t *testing.T) {
 
 	ta := TermAsker{Writer: &output, Scanner: scanner}
 	err, input, skipped := ta.AskInput("The earth is flat?", false)
-
-	fmt.Println(output.String())
-	fmt.Println(output.String())
 
 	if !strings.Contains(output.String(), "The earth is flat?") {
 		t.Errorf("Expected output to be The earth is flat?, got %v instead", output.String())
