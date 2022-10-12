@@ -19,15 +19,18 @@ func TestShouldAskQuestionsOnNGL(t *testing.T) {
 	mockQuestionAsker := mocks.NewMockQuestionAsker(mockCtrl)
 	mockTermAsker := mocks.NewMockTermAsker(mockCtrl)
 
-	mockQuestionAsker.EXPECT().AskQuestion(user, question).Return(nil).Times(1)
+	mockQuestionAsker.EXPECT().AskQuestion(user, question).Return(nil).Times(2)
+
 	first := mockTermAsker.EXPECT().AskInput("Type NGL user", false).Return(nil, user, false)
 	second := mockTermAsker.EXPECT().AskInput("Type a question", true).Return(nil, question, false)
 	third := mockTermAsker.EXPECT().AskInput("Type a question", true).Return(nil, "s", true)
+	fourth := mockTermAsker.EXPECT().AskInput("How many times should repeat questions?", false).Return(nil, "2", false)
 
 	gomock.InOrder(
 		first,
 		second,
 		third,
+		fourth,
 	)
 
 	fmt.Println("mockQuestionAsker", mockQuestionAsker)

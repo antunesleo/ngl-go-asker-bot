@@ -3,6 +3,7 @@ package askerbot
 import (
 	"fmt"
 	"io"
+	"strconv"
 )
 
 type QuestionAsker interface {
@@ -15,8 +16,8 @@ type TermAsker interface {
 
 func Run(writer io.Writer, asker QuestionAsker, termAsker TermAsker) {
 	questions := []string{}
-
 	fmt.Fprintln(writer, "Welcome to NGL Asker BOT! o/")
+
 	err, user, _ := termAsker.AskInput("Type NGL user", false)
 	if err != nil {
 		return
@@ -33,6 +34,16 @@ func Run(writer io.Writer, asker QuestionAsker, termAsker TermAsker) {
 		questions = append(questions, question)
 	}
 
+	err, repeatAnswer, _ := termAsker.AskInput("How many times should repeat questions?", false)
+	if err != nil {
+		return
+	}
+
+	repeat, err := strconv.Atoi(repeatAnswer)
+	if err != nil {
+		return
+	}
+
 	output := `
 
 ----------------------------
@@ -44,9 +55,11 @@ User %s
 	fmt.Fprintf(writer, output, user)
 
 	for _, question := range questions {
-		err := asker.AskQuestion(user, question)
-		if err == nil {
-			fmt.Fprintln(writer, "Asked question: ", question)
+		for i := 1; i <= repeat; i++ {
+			err := asker.AskQuestion(user, question)
+			if err == nil {
+				fmt.Fprintln(writer, "Asked question: ", question)
+			}
 		}
 	}
 }
