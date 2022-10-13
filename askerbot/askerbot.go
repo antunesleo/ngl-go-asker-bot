@@ -13,24 +13,28 @@ type TermAsker interface {
 	AskInput(question string, isSkippable bool) (error, string, bool)
 }
 
-func Run(writer io.Writer, asker QuestionAsker, termAsker TermAsker) {
-	questions := []string{}
+type DataProvider interface {
+	ProvideUser() (error, string)
+	ProvideQuestions() []string
+	ProvideRepetitions() (error, int)
+}
 
+func Run(writer io.Writer, asker QuestionAsker, dataProvider DataProvider) {
 	fmt.Fprintln(writer, "Welcome to NGL Asker BOT! o/")
-	err, user, _ := termAsker.AskInput("Type NGL user", false)
+
+	err, user := dataProvider.ProvideUser()
 	if err != nil {
 		return
 	}
 
-	for {
-		err, question, skipped := termAsker.AskInput("Type a question", true)
-		if err != nil {
-			return
-		}
-		if skipped {
-			break
-		}
-		questions = append(questions, question)
+	questions := dataProvider.ProvideQuestions()
+	if len(questions) == 0 {
+		return
+	}
+
+	err, repeat := dataProvider.ProvideRepetitions()
+	if err != nil {
+		return
 	}
 
 	output := `
@@ -44,9 +48,11 @@ User %s
 	fmt.Fprintf(writer, output, user)
 
 	for _, question := range questions {
-		err := asker.AskQuestion(user, question)
-		if err == nil {
-			fmt.Fprintln(writer, "Asked question: ", question)
+		for i := 1; i <= repeat; i++ {
+			err := asker.AskQuestion(user, question)
+			if err == nil {
+				fmt.Fprintln(writer, "Asked question: ", question)
+			}
 		}
 	}
 }
