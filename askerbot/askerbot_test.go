@@ -2,7 +2,6 @@ package askerbot
 
 import (
 	"bytes"
-	"fmt"
 	"testing"
 
 	"github.com/antunesleo/ngl-go-asker-bot/mocks"
@@ -15,26 +14,15 @@ func TestShouldAskQuestionsOnNGL(t *testing.T) {
 
 	user := "breno"
 	question := "The flat is earth?"
+	questions := []string{question}
 
 	mockQuestionAsker := mocks.NewMockQuestionAsker(mockCtrl)
-	mockTermAsker := mocks.NewMockTermAsker(mockCtrl)
+	mockDataProvider := mocks.NewMockDataProvider(mockCtrl)
 
 	mockQuestionAsker.EXPECT().AskQuestion(user, question).Return(nil).Times(2)
+	mockDataProvider.EXPECT().ProvideUser().Return(nil, user)
+	mockDataProvider.EXPECT().ProvideQuestions().Return(questions)
+	mockDataProvider.EXPECT().ProvideRepetitions().Return(nil, 2)
 
-	first := mockTermAsker.EXPECT().AskInput("Type NGL user", false).Return(nil, user, false)
-	second := mockTermAsker.EXPECT().AskInput("Type a question", true).Return(nil, question, false)
-	third := mockTermAsker.EXPECT().AskInput("Type a question", true).Return(nil, "s", true)
-	fourth := mockTermAsker.EXPECT().AskInput("How many times should repeat questions?", false).Return(nil, "2", false)
-
-	gomock.InOrder(
-		first,
-		second,
-		third,
-		fourth,
-	)
-
-	fmt.Println("mockQuestionAsker", mockQuestionAsker)
-	fmt.Println("mockTermAsker", mockTermAsker)
-
-	Run(&bytes.Buffer{}, mockQuestionAsker, mockTermAsker)
+	Run(&bytes.Buffer{}, mockQuestionAsker, mockDataProvider)
 }

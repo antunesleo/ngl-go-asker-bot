@@ -3,7 +3,6 @@ package askerbot
 import (
 	"fmt"
 	"io"
-	"strconv"
 )
 
 type QuestionAsker interface {
@@ -15,37 +14,25 @@ type TermAsker interface {
 }
 
 type DataProvider interface {
-	provideUser() (error, string)
-	provideQuestion() (error, string, bool)
-	provideRepetitions() (error, string)
+	ProvideUser() (error, string)
+	ProvideQuestions() []string
+	ProvideRepetitions() (error, int)
 }
 
-func Run(writer io.Writer, asker QuestionAsker, termAsker TermAsker) {
-	questions := []string{}
+func Run(writer io.Writer, asker QuestionAsker, dataProvider DataProvider) {
 	fmt.Fprintln(writer, "Welcome to NGL Asker BOT! o/")
 
-	err, user, _ := termAsker.AskInput("Type NGL user", false)
+	err, user := dataProvider.ProvideUser()
 	if err != nil {
 		return
 	}
 
-	for {
-		err, question, skipped := termAsker.AskInput("Type a question", true)
-		if err != nil {
-			return
-		}
-		if skipped {
-			break
-		}
-		questions = append(questions, question)
-	}
-
-	err, repeatAnswer, _ := termAsker.AskInput("How many times should repeat questions?", false)
-	if err != nil {
+	questions := dataProvider.ProvideQuestions()
+	if len(questions) == 0 {
 		return
 	}
 
-	repeat, err := strconv.Atoi(repeatAnswer)
+	err, repeat := dataProvider.ProvideRepetitions()
 	if err != nil {
 		return
 	}

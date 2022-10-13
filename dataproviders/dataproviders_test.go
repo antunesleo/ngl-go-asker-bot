@@ -26,19 +26,24 @@ func TestShouldProvideUser(t *testing.T) {
 	assertEqual(got, want, t)
 }
 
-func TestShouldProvideQuestion(t *testing.T) {
+func TestShouldProvideQuestions(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
-	want := "Is the earth flat?"
+	want := []string{"Is the earth flat?"}
 	mockTermAsker := mocks.NewMockTermAsker(mockCtrl)
-	mockTermAsker.EXPECT().AskInput("Type a question", true).Return(nil, want, false)
+	first := mockTermAsker.EXPECT().AskInput("Type a question", true).Return(nil, want[0], false)
+	second := mockTermAsker.EXPECT().AskInput("Type a question", true).Return(nil, "s", true)
+
+	gomock.InOrder(
+		first,
+		second,
+	)
 
 	tdp := TermDataProvider{mockTermAsker}
-	err, got, skipped := tdp.ProvideQuestion()
-	assertNotError(err, t)
-	assertEqual(got, want, t)
-	assertFalse(skipped, t)
+	got := tdp.ProvideQuestions()
+	assertIntEqual(len(got), 1, t)
+	assertEqual(got[0], want[0], t)
 }
 
 func TestShouldProvideRepetitions(t *testing.T) {
