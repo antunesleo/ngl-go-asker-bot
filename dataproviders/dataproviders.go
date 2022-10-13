@@ -49,24 +49,56 @@ func (tdp *TermDataProvider) ProvideRepetitions() (error, int) {
 
 type JsonFileDataProvider struct {
 	Path string
+	data *Data
 }
 
 type Data struct {
-	User string `json:user`
+	User        string   `json:"user"`
+	Questions   []string `json:"questions"`
+	Repetitions int      `json:"repetitions"`
 }
 
 var ErrFailedToReadJsonFile = errors.New("Failed to read json config")
 
 func (jfdp *JsonFileDataProvider) ProvideUser() (error, string) {
-	jsonFile, err := os.Open(jfdp.Path + "/" + "data.json")
+	err, data := jfdp.getData()
+	if err != nil {
+		return err, ""
+	}
+	return nil, data.User
+}
+
+func (jfdp *JsonFileDataProvider) getData() (error, *Data) {
+	if jfdp.data != nil {
+		return nil, jfdp.data
+	}
+	filePath := jfdp.Path + "/" + "data.json"
+	jsonFile, err := os.Open(filePath)
 	defer jsonFile.Close()
 
 	if err != nil {
-		return ErrFailedToReadJsonFile, ""
+		return ErrFailedToReadJsonFile, &Data{}
 	}
 
 	byteValue, _ := ioutil.ReadAll(jsonFile)
-	var data Data
+	var data *Data
 	json.Unmarshal(byteValue, &data)
-	return nil, data.User
+	jfdp.data = data
+	return nil, data
+}
+
+func (jfdp *JsonFileDataProvider) ProvideQuestions() (error, []string) {
+	err, data := jfdp.getData()
+	if err != nil {
+		return err, []string{}
+	}
+	return nil, data.Questions
+}
+
+func (jfdp *JsonFileDataProvider) ProvideRepetitions() (error, int) {
+	err, data := jfdp.getData()
+	if err != nil {
+		return err, 0
+	}
+	return nil, data.Repetitions
 }

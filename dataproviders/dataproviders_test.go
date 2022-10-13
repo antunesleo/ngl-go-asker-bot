@@ -70,7 +70,7 @@ func TestTermDataProvider(t *testing.T) {
 
 		tdp := TermDataProvider{mockInputAsker}
 		err, _ := tdp.ProvideRepetitions()
-		AssertError(err, t)
+		AssertError(ErrInputCast, err, t)
 	})
 }
 
@@ -80,16 +80,70 @@ func TestConfigFileDataProvider(t *testing.T) {
 		mockCtrl := gomock.NewController(t)
 		defer mockCtrl.Finish()
 
-		cfdp := JsonFileDataProvider{Path: "/home/leo/projects/ngl-go-asker-bot/mocks"}
-		err, got := cfdp.ProvideUser()
+		jfdp := JsonFileDataProvider{Path: "./testdata"}
+		err, got := jfdp.ProvideUser()
 		assertNotError(err, t)
 		assertEqual(got, want, t)
 	})
+
+	t.Run("should not provide user when no config file", func(t *testing.T) {
+		mockCtrl := gomock.NewController(t)
+		defer mockCtrl.Finish()
+
+		jfdp := JsonFileDataProvider{Path: "./wrongdir"}
+		err, _ := jfdp.ProvideUser()
+		AssertError(err, ErrFailedToReadJsonFile, t)
+	})
+
+	t.Run("should provide questions", func(t *testing.T) {
+		mockCtrl := gomock.NewController(t)
+		defer mockCtrl.Finish()
+
+		jfdp := JsonFileDataProvider{Path: "./testdata"}
+		_, questions := jfdp.ProvideQuestions()
+		assertIntEqual(len(questions), 2, t)
+		assertEqual("Is the earth flat?", questions[0], t)
+		assertEqual("Is the flat earth?", questions[1], t)
+	})
+
+	t.Run("should not provide questions when no config file", func(t *testing.T) {
+		mockCtrl := gomock.NewController(t)
+		defer mockCtrl.Finish()
+
+		jfdp := JsonFileDataProvider{Path: "./wrongdir"}
+		err, _ := jfdp.ProvideQuestions()
+		AssertError(err, ErrFailedToReadJsonFile, t)
+	})
+
+	t.Run("should provide repetitions", func(t *testing.T) {
+		mockCtrl := gomock.NewController(t)
+		defer mockCtrl.Finish()
+
+		jfdp := JsonFileDataProvider{Path: "./testdata"}
+		_, repetitions := jfdp.ProvideRepetitions()
+		assertIntEqual(repetitions, 100, t)
+	})
+
+	t.Run("should get cached data", func(t *testing.T) {
+		want := "breno"
+		mockCtrl := gomock.NewController(t)
+		defer mockCtrl.Finish()
+
+		jfdp := JsonFileDataProvider{Path: "./testdata"}
+		err, data := jfdp.getData()
+		assertNotError(err, t)
+		assertEqual(data.User, want, t)
+
+		jfdp.Path = "./wrongpath"
+		err, data = jfdp.getData()
+		assertNotError(err, t)
+		assertEqual(data.User, want, t)
+	})
 }
 
-func AssertError(err error, t *testing.T) {
-	if err != ErrInputCast {
-		t.Fatalf("expect error to be %v got %v", ErrInputCast, err)
+func AssertError(want error, got error, t *testing.T) {
+	if want != got {
+		t.Fatalf("expect error to be %v got %v", want, got)
 	}
 }
 
@@ -101,13 +155,13 @@ func assertFalse(skipped bool, t *testing.T) {
 
 func assertEqual(got string, want string, t *testing.T) {
 	if got != want {
-		t.Errorf("Expected user to be %s, got %s", want, got)
+		t.Errorf("Expected %s, got %s", want, got)
 	}
 }
 
 func assertIntEqual(got int, want int, t *testing.T) {
 	if got != want {
-		t.Errorf("Expected user to be %v, got %v", want, got)
+		t.Errorf("Expected %v, got %v", want, got)
 	}
 }
 
