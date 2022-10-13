@@ -5,12 +5,12 @@ import (
 	"strconv"
 )
 
-type TermAsker interface {
+type InputAsker interface {
 	AskInput(question string, isSkippable bool) (error, string, bool)
 }
 
 type TermDataProvider struct {
-	TermAsker TermAsker
+	TermAsker InputAsker
 }
 
 func (tdp *TermDataProvider) ProvideUser() (error, string) {

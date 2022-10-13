@@ -13,7 +13,7 @@ func TestShouldProvideUser(t *testing.T) {
 	defer mockCtrl.Finish()
 
 	want := "breno"
-	mockTermAsker := mocks.NewMockTermAsker(mockCtrl)
+	mockTermAsker := mocks.NewMockInputAsker(mockCtrl)
 	first := mockTermAsker.EXPECT().AskInput("Type NGL user", false).Return(nil, want, false)
 
 	gomock.InOrder(
@@ -31,7 +31,7 @@ func TestShouldProvideQuestions(t *testing.T) {
 	defer mockCtrl.Finish()
 
 	want := []string{"Is the earth flat?"}
-	mockTermAsker := mocks.NewMockTermAsker(mockCtrl)
+	mockTermAsker := mocks.NewMockInputAsker(mockCtrl)
 	first := mockTermAsker.EXPECT().AskInput("Type a question", true).Return(nil, want[0], false)
 	second := mockTermAsker.EXPECT().AskInput("Type a question", true).Return(nil, "s", true)
 
@@ -51,7 +51,7 @@ func TestShouldProvideRepetitions(t *testing.T) {
 	defer mockCtrl.Finish()
 
 	want := 2
-	mockTermAsker := mocks.NewMockTermAsker(mockCtrl)
+	mockTermAsker := mocks.NewMockInputAsker(mockCtrl)
 	mockTermAsker.EXPECT().AskInput("How many times should repeat questions?", false).Return(nil, "2", false)
 
 	tdp := TermDataProvider{mockTermAsker}
@@ -64,7 +64,7 @@ func TestProvideRepetitionsShouldReturnErrorWhenFailToCastInput(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
-	mockTermAsker := mocks.NewMockTermAsker(mockCtrl)
+	mockTermAsker := mocks.NewMockInputAsker(mockCtrl)
 	mockTermAsker.EXPECT().AskInput("How many times should repeat questions?", false).Return(errors.New(""), "", false)
 
 	tdp := TermDataProvider{mockTermAsker}

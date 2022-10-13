@@ -9,10 +9,6 @@ type QuestionAsker interface {
 	AskQuestion(user, question string) error
 }
 
-type TermAsker interface {
-	AskInput(question string, isSkippable bool) (error, string, bool)
-}
-
 type DataProvider interface {
 	ProvideUser() (error, string)
 	ProvideQuestions() []string
