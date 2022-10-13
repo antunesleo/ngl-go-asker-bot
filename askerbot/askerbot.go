@@ -14,6 +14,12 @@ type TermAsker interface {
 	AskInput(question string, isSkippable bool) (error, string, bool)
 }
 
+type DataProvider interface {
+	provideUser() (error, string)
+	provideQuestion() (error, string, bool)
+	provideRepetitions() (error, string)
+}
+
 func Run(writer io.Writer, asker QuestionAsker, termAsker TermAsker) {
 	questions := []string{}
 	fmt.Fprintln(writer, "Welcome to NGL Asker BOT! o/")
