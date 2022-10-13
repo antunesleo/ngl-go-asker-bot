@@ -1,7 +1,10 @@
 package dataproviders
 
 import (
+	"encoding/json"
 	"errors"
+	"io/ioutil"
+	"os"
 	"strconv"
 )
 
@@ -44,4 +47,26 @@ func (tdp *TermDataProvider) ProvideRepetitions() (error, int) {
 	return err, repetitions
 }
 
-type JSONFileDataProvider struct{}
+type JsonFileDataProvider struct {
+	Path string
+}
+
+type Data struct {
+	User string `json:user`
+}
+
+var ErrFailedToReadJsonFile = errors.New("Failed to read json config")
+
+func (jfdp *JsonFileDataProvider) ProvideUser() (error, string) {
+	jsonFile, err := os.Open(jfdp.Path + "/" + "data.json")
+	defer jsonFile.Close()
+
+	if err != nil {
+		return ErrFailedToReadJsonFile, ""
+	}
+
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+	var data Data
+	json.Unmarshal(byteValue, &data)
+	return nil, data.User
+}
