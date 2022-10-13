@@ -13,7 +13,7 @@ import (
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	termAsker := termasker.New(scanner, os.Stdout)
-	dataProvider := dataproviders.TermDataProvider{TermAsker: termAsker}
+	dataProvider := dataproviders.CreateDataProvider("./", termAsker)
 	nglClient := nglclient.New("https://ngl.link", os.Stdout)
-	askerbot.Run(os.Stdout, nglClient, &dataProvider)
+	askerbot.Run(os.Stdout, nglClient, dataProvider)
 }

@@ -21,7 +21,7 @@ func TestShouldAskQuestionsOnNGL(t *testing.T) {
 
 	mockQuestionAsker.EXPECT().AskQuestion(user, question).Return(nil).Times(2)
 	mockDataProvider.EXPECT().ProvideUser().Return(nil, user)
-	mockDataProvider.EXPECT().ProvideQuestions().Return(questions)
+	mockDataProvider.EXPECT().ProvideQuestions().Return(nil, questions)
 	mockDataProvider.EXPECT().ProvideRepetitions().Return(nil, 2)
 
 	Run(&bytes.Buffer{}, mockQuestionAsker, mockDataProvider)

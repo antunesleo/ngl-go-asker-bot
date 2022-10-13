@@ -11,7 +11,7 @@ type QuestionAsker interface {
 
 type DataProvider interface {
 	ProvideUser() (error, string)
-	ProvideQuestions() []string
+	ProvideQuestions() (error, []string)
 	ProvideRepetitions() (error, int)
 }
 
@@ -23,7 +23,10 @@ func Run(writer io.Writer, asker QuestionAsker, dataProvider DataProvider) {
 		return
 	}
 
-	questions := dataProvider.ProvideQuestions()
+	err, questions := dataProvider.ProvideQuestions()
+	if err != nil {
+		return
+	}
 	if len(questions) == 0 {
 		return
 	}

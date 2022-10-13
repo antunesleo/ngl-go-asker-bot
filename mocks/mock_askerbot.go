@@ -71,11 +71,12 @@ func (m *MockDataProvider) EXPECT() *MockDataProviderMockRecorder {
 }
 
 // ProvideQuestions mocks base method.
-func (m *MockDataProvider) ProvideQuestions() []string {
+func (m *MockDataProvider) ProvideQuestions() (error, []string) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ProvideQuestions")
-	ret0, _ := ret[0].([]string)
-	return ret0
+	ret0, _ := ret[0].(error)
+	ret1, _ := ret[1].([]string)
+	return ret0, ret1
 }
 
 // ProvideQuestions indicates an expected call of ProvideQuestions.
