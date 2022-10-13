@@ -42,7 +42,8 @@ func TestTermDataProvider(t *testing.T) {
 		)
 
 		tdp := TermDataProvider{mockInputAsker}
-		got := tdp.ProvideQuestions()
+		err, got := tdp.ProvideQuestions()
+		assertNotError(err, t)
 		assertIntEqual(len(got), 1, t)
 		assertEqual(got[0], want[0], t)
 	})
@@ -141,14 +142,44 @@ func TestConfigFileDataProvider(t *testing.T) {
 	})
 }
 
+func TestCreateDataProvider(t *testing.T) {
+	t.Run("create json file data provider when has json file", func(t *testing.T) {
+		mockCtrl := gomock.NewController(t)
+		defer mockCtrl.Finish()
+
+		mockInputAsker := mocks.NewMockInputAsker(mockCtrl)
+
+		dataProvider := CreateDataProvider("./testdata", mockInputAsker)
+		_, ok := dataProvider.(*JsonFileDataProvider)
+		assertTrue(ok, t)
+	})
+
+	t.Run("create term data provider when has not json file", func(t *testing.T) {
+		mockCtrl := gomock.NewController(t)
+		defer mockCtrl.Finish()
+
+		mockInputAsker := mocks.NewMockInputAsker(mockCtrl)
+		dataProvider := CreateDataProvider("./wrongpath", mockInputAsker)
+		_, ok := dataProvider.(*TermDataProvider)
+		assertTrue(ok, t)
+
+	})
+}
+
 func AssertError(want error, got error, t *testing.T) {
 	if want != got {
 		t.Fatalf("expect error to be %v got %v", want, got)
 	}
 }
 
-func assertFalse(skipped bool, t *testing.T) {
-	if skipped {
+func assertFalse(value bool, t *testing.T) {
+	if value {
+		t.Errorf("Expected it to be True")
+	}
+}
+
+func assertTrue(value bool, t *testing.T) {
+	if !value {
 		t.Errorf("Expected it to be True")
 	}
 }

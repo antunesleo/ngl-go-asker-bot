@@ -6,7 +6,13 @@ import (
 	"io/ioutil"
 	"os"
 	"strconv"
+
+	"github.com/antunesleo/ngl-go-asker-bot/askerbot"
 )
+
+func getJsonFilePath(path string) string {
+	return path + "/" + "data.json"
+}
 
 type InputAsker interface {
 	AskInput(question string, isSkippable bool) (error, string, bool)
@@ -21,19 +27,19 @@ func (tdp *TermDataProvider) ProvideUser() (error, string) {
 	return err, user
 }
 
-func (tdp *TermDataProvider) ProvideQuestions() []string {
+func (tdp *TermDataProvider) ProvideQuestions() (error, []string) {
 	questions := []string{}
 	for {
 		err, question, skipped := tdp.TermAsker.AskInput("Type a question", true)
 		if err != nil {
-			return questions
+			return ErrInputCast, questions
 		}
 		if skipped {
 			break
 		}
 		questions = append(questions, question)
 	}
-	return questions
+	return nil, questions
 }
 
 var ErrInputCast = errors.New("Failed to cast input")
@@ -72,8 +78,7 @@ func (jfdp *JsonFileDataProvider) getData() (error, *Data) {
 	if jfdp.data != nil {
 		return nil, jfdp.data
 	}
-	filePath := jfdp.Path + "/" + "data.json"
-	jsonFile, err := os.Open(filePath)
+	jsonFile, err := os.Open(getJsonFilePath(jfdp.Path))
 	defer jsonFile.Close()
 
 	if err != nil {
@@ -101,4 +106,12 @@ func (jfdp *JsonFileDataProvider) ProvideRepetitions() (error, int) {
 		return err, 0
 	}
 	return nil, data.Repetitions
+}
+
+func CreateDataProvider(filePath string, inputAsker InputAsker) askerbot.DataProvider {
+	_, err := os.Stat(getJsonFilePath(filePath))
+	if err == nil {
+		return &JsonFileDataProvider{Path: filePath}
+	}
+	return &TermDataProvider{TermAsker: inputAsker}
 }
