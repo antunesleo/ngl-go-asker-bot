@@ -20,11 +20,15 @@ func Run(writer io.Writer, asker QuestionAsker, dataProvider DataProvider) {
 
 	err, user := dataProvider.ProvideUser()
 	if err != nil {
+		line := fmt.Sprintf("Skipping, Failed to get user data, err %v", err)
+		fmt.Fprintln(writer, line)
 		return
 	}
 
 	err, questions := dataProvider.ProvideQuestions()
 	if err != nil {
+		line := fmt.Sprintf("Skipping, Failed to get questions data, err %v", err)
+		fmt.Fprintln(writer, line)
 		return
 	}
 	if len(questions) == 0 {
@@ -33,9 +37,15 @@ func Run(writer io.Writer, asker QuestionAsker, dataProvider DataProvider) {
 
 	err, repeat := dataProvider.ProvideRepetitions()
 	if err != nil {
+		line := fmt.Sprintf("Skipping, Failed to get repeat data, err %v", err)
+		fmt.Fprintln(writer, line)
 		return
 	}
 
+	askQuestions(writer, user, questions, repeat, asker)
+}
+
+func askQuestions(writer io.Writer, user string, questions []string, repeat int, asker QuestionAsker) {
 	output := `
 
 ----------------------------
@@ -51,6 +61,9 @@ User %s
 			err := asker.AskQuestion(user, question)
 			if err == nil {
 				fmt.Fprintln(writer, "Asked question: ", question)
+			} else {
+				line := fmt.Sprintf("Failed to ask question %s, err %v", question, err)
+				fmt.Fprintln(writer, line)
 			}
 		}
 	}

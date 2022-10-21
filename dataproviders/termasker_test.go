@@ -22,18 +22,10 @@ func TestShouldAskInput(t *testing.T) {
 	ta := TermAsker{Writer: &output, Scanner: scanner}
 	err, input, skipped := ta.AskInput("The earth is flat?", false)
 
-	if !strings.Contains(output.String(), "The earth is flat?") {
-		t.Errorf("Expected output to be The earth is flat?, got %v instead", output.String())
-	}
-	if err != nil {
-		t.Errorf("Expected error to be nil")
-	}
-	if input != "yes" {
-		t.Errorf("Expected input to be yes, got %v instead", input)
-	}
-	if skipped {
-		t.Errorf("Exected skipped to be false, got true instead")
-	}
+	assertOutput(output, "The earth is flat?", t)
+	assertNotError(err, t)
+	assertInputYes(input, t)
+	assertNotSkipped(skipped, t)
 }
 
 func TestShouldSkipQuestion(t *testing.T) {
@@ -44,16 +36,38 @@ func TestShouldSkipQuestion(t *testing.T) {
 	ta := TermAsker{Writer: &output, Scanner: scanner}
 	err, input, skipped := ta.AskInput("The earth is flat?", true)
 
-	if !strings.Contains(output.String(), "The earth is flat? | [s] to skip") {
+	assertOutput(output, "The earth is flat? | [s] to skip", t)
+	assertNotError(err, t)
+	assertEmpty(input, t)
+	assertSkipped(skipped, t)
+}
+
+func assertOutput(output bytes.Buffer, want_output string, t *testing.T) {
+	if !strings.Contains(output.String(), want_output) {
 		t.Errorf("Expected output to be The earth is flat? | [s] to skip, got %v instead", output.String())
 	}
-	if err != nil {
-		t.Errorf("Expected error to be nil")
+}
+
+func assertSkipped(skipped bool, t *testing.T) {
+	if !skipped {
+		t.Errorf("Exected skipped to be true, got false instead")
 	}
+}
+
+func assertEmpty(input string, t *testing.T) {
 	if input != "" {
 		t.Errorf("Expected input to be s, got %v instead", input)
 	}
-	if !skipped {
-		t.Errorf("Exected skipped to be true, got false instead")
+}
+
+func assertInputYes(input string, t *testing.T) {
+	if input != "yes" {
+		t.Errorf("Expected input to be yes, got %v instead", input)
+	}
+}
+
+func assertNotSkipped(skipped bool, t *testing.T) {
+	if skipped {
+		t.Errorf("Exected skipped to be false, got true instead")
 	}
 }
